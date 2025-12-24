@@ -1,4 +1,5 @@
 import socket
+import time
 
 #-------------SERVER----------#
 
@@ -14,22 +15,29 @@ accept_state = False
 client = None
 address = None
 
+my_socket.listen(5)
+
+def send_receive_data():
+    while True:
+        client.sendall(b"test sending from server\n")
+
+        data = client.recv(1024)
+        if not data:
+            print(f"Client {address} disconnected")
+            break
+
+        print(f"Received from {address}: {data.decode()}")
+
 while True:
-
-
-    my_socket.listen(5)
+    time.sleep(0.5)
     try:
         client, address = my_socket.accept()
         print(f"socked accepted, {client}, {address}")
-        accept_state = True
-    except Exception as err:
-        print(f"Error: {err}")
 
-    if accept_state:
-        client.sendall(b"test sending from server \n")
-        data = client.recv(1024)
-        if not data:
-            client.close()
-    elif not accept_state:
-        accept_state = False
+        with client:
+            send_receive_data()
+
+    except Exception as e:
+        print(f"Error: {e}")
+
 
