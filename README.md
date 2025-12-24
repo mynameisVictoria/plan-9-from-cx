@@ -19,7 +19,7 @@ simple communication, and i geuss techincly data sharing lol.
 - i will try to get
 
 Current version:
-0.0.1
+0.0.1-dev
 
 ---
 
