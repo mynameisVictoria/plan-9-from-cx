@@ -24,7 +24,6 @@ def send_receive_data(thread_client, thread_address):
     while True:
         try:
             data = thread_client.recv(1024)
-            print("data received")
             if not data:         # if no data is received
                 print(f"Client {thread_address} disconnected")
                 with socket_lock:
