@@ -19,6 +19,16 @@ def handle_input():
         if send_info_input == "exit":
             break
 
+def constant_recv():
+    while True:
+        time.sleep(0.1)
+        try:
+            print(my_socket.recv(1024).decode())
+        except socket.timeout:
+            continue
+        except Exception:
+            pass
+
 def main():
     connected = False
 
@@ -46,16 +56,16 @@ def main():
                         break
                     else:
                         my_socket.sendall(send_data.encode("utf-8"))
-                        print("sent")
+                        #print("sent")
                 except (socket.error, OSError) as err:   #don't really know what can go wrong
                     print(err)
-            try:
-                print(my_socket.recv(1024).decode())
-            except socket.timeout:  #checks if the socket times out afer 0.5 seconds
-                pass
 
 input_thread = threading.Thread(target=handle_input)
+recv_thread = threading.Thread(target=constant_recv, daemon=True)
+
 input_thread.start()   #starts the user input thread
+recv_thread.start()
 
 main()
 input_thread.join()
+recv_thread.join()
