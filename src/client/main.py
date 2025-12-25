@@ -26,7 +26,7 @@ def main():
         time.sleep(0.5)
         if not connected:
             try:
-                my_socket.connect(("localhost", port))
+                my_socket.connect(("127.0.0.1", port))
                 print("socket connected")
                 connected = True
             except OSError as e:
