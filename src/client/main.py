@@ -3,6 +3,7 @@ import errno
 import time
 import threading
 from queue import Queue
+from client_funcs import *
 
 #-----------------CLIENT-------------------------#
 my_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -12,7 +13,10 @@ port = 1111
 
 send_info_queue = Queue(maxsize=10)   # thread safe data exchange
 
+storing = JsonStoring()
 name = input("Whats your name?")
+storing.write_name(name)
+
 
 def handle_input():
     while True:
@@ -53,7 +57,7 @@ def main():
                 continue
             elif not send_info_queue.empty():  #if it's not empty, try to send the data
                 try:
-                    send_data = name + ": " + send_info_queue.get()
+                    send_data = storing.read_name() + ": " + send_info_queue.get()
                     if send_data == "exit":
                         break
                     else:
