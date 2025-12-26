@@ -1,32 +1,22 @@
-import socket
+import json
 
-class Client:
-    def __init__(self, port, client_address, client_socket, server_socket):
-        self.port = port
-        self.server_socket = server_socket
-        self.client_socket = client_socket
-        self.client_address = client_address
+class JsonStoring:
+    def __init__(self):
+        pass
 
-    def receive_data(self):
-        data = self.client_socket.recv(1024)
-        if not data:
-            return False
-        elif data:
-            return data.decode()
-        else:
-            return False
-
-    def send_data(self, send_data):
-        try:
-            self.client_socket.sendall(send_data.encode())
-            return True
-        except socket.error:
-            return False
-        except Exception as err:
-            return err
-        
-
-
-
-
-
+    @staticmethod
+    def read_name():
+        with open("user_data.json", "r", encoding="utf-8") as file:
+            contents = file.read()
+            dict_data = json.loads(contents)
+            name = dict_data["name"]
+            return name
+    @staticmethod
+    def write_name(name):
+        with open("user_data.json","r+", encoding="utf-8") as file:
+            contents = file.read()
+            file.seek(0)
+            file.truncate()
+            dict_data = json.loads(contents)
+            dict_data["name"] = name
+            file.write(json.dumps(dict_data))
