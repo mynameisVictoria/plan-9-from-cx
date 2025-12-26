@@ -58,7 +58,6 @@ def broadcast_messages():
                         socket_list.remove(list_client)
                         list_client.close()
 
-
 broadcast_thread = threading.Thread(
     target=broadcast_messages,
     daemon=True
