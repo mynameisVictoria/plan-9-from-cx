@@ -14,9 +14,19 @@ port = 1111
 send_info_queue = Queue(maxsize=10)   # thread safe data exchange
 
 storing = JsonStoring()
-name = input("Whats your name?")
-storing.write_name(name)
 
+if not storing.check_name():
+    name = input("Whats your name?")
+    storing.write_name(name)
+elif storing.check_name():
+    name_decision = input(f"do you wish to change your name, current name: {storing.read_name()} \n y or n \n")
+    if name_decision.lower() == "y":
+        new_name = input("input new name \n")
+        storing.write_name(new_name)
+    elif name_decision.lower() == "n":
+        print("cool")
+    else:
+        print("\n")
 
 def handle_input():
     while True:
