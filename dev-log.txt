@@ -13,3 +13,7 @@ Thursday, December 25, 2025, 09:29 EST
 
 Friday, December 26, 2025, 06:05 EST
 - implemeted json for storing the usernames lol
+
+Monday, 29 December 2025, 14:00~ 
+- kinda just refactored the entire client side script with tls, serverside too
+- server is also up and running, clients can connect, its all working honestly
