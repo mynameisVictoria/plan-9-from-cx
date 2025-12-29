@@ -13,7 +13,7 @@ port = 1111
 
 send_info_queue = Queue(maxsize=10)   # thread safe data exchange
 
-storing = JsonStoring()
+storing = JsonStoring("user_data.json")
 
 if not storing.check_name():
     name = input("Whats your name?")
