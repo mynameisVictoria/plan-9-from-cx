@@ -12,8 +12,8 @@ simple communication, and i geuss techincly data sharing lol.
 
 ## Tech Stuff
 - it is server-client model
-- it will be hosted on a vps ill rent from somewhere
-- i will host it on my own hardware eventually
+- it is hosted on a netcup vps (shoutout btw)
+- i will host it on my own hardware eventually (maybe)
 - is opensource, privacy rules!
 
 ## Release state
