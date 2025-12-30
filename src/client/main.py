@@ -5,6 +5,7 @@ from queue import Queue
 from client_funcs import *
 import ssl
 import errno
+from datetime import datetime, timezone
 
 #-----------------CLIENT-------------------------#
 
@@ -14,6 +15,7 @@ context = ssl.create_default_context()
 
 port = 1111
 send_info_queue = Queue(maxsize=10)   # thread safe data exchange
+message_lock = threading.Lock()
 
 print("For more information check out the GitHub \n https://github.com/mynameisVictoria/comms-platform \n")
 
@@ -22,20 +24,22 @@ if not storing.check_name():
     name = input("Whats your name?")
     storing.write_name(name)
 elif storing.check_name():
-    name_decision = input(f"do you wish to change your name, current name: {storing.read_name()} \n y or n \n")
+    name_decision = input(f"do you wish to change your name, current name: {storing.get_name()} \n y or n \n")
     if name_decision.lower() == "y":
         new_name = input("input new name \n")
         storing.write_name(new_name)
-        print("simply type, and press enter to transmit \n")
+        print("simply type, and press enter to transmit: \n")
     elif name_decision.lower() == "n":
-        print("simply type, and press enter to transmit \n")
+        print("simply type, and press enter to transmit: \n")
     else:
-        print("simply type, and press enter to transmit \n")
+        print("simply type, and press enter to transmit: \n")
 
 def handle_input():
     while True:
-        send_info_input = input("")
-        send_info_queue.put(send_info_input)
+        time.sleep(0.1)
+        with message_lock:
+            send_info_input = input("")
+            send_info_queue.put(send_info_input)
         if send_info_input == "exit":
             break
 
@@ -48,6 +52,10 @@ def constant_recv(recv_socket):
             continue
         except Exception:
             pass
+
+def format_message(username, message):
+    timestamp = datetime.now(timezone.utc).strftime('%H:%M:%S')
+    return f"[{timestamp} ] | {username}: {message}"
 
 def main():
 
@@ -74,7 +82,8 @@ def main():
                     continue
                 elif not send_info_queue.empty():  #if it's not empty, try to send the data
                     try:
-                        send_data = storing.read_name() + ": " + send_info_queue.get()
+                        with message_lock:
+                            send_data = format_message(storing.get_name(), send_info_queue.get())
                         if send_data == "exit":
                             break
                         else:
@@ -85,6 +94,7 @@ def main():
         except OSError as err:
             if err.errno in (errno.EISCONN, 9): #bad file descriptor
                 continue
+
 
 input_thread = threading.Thread(target=handle_input)
 input_thread.start()   #starts the user input thread
