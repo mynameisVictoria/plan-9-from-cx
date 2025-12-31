@@ -10,6 +10,7 @@ class JsonStoring:
             dict_data = json.loads(contents)
             name = dict_data["name"]
             return name
+    
     def write_name(self,name):
         with open(self.file_name,"r+", encoding="utf-8") as file:
             contents = file.read()
