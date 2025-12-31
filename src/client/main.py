@@ -6,6 +6,7 @@ from client_funcs import *
 import ssl
 from datetime import datetime, timezone
 import sys
+from pathlib import Path
 #-----------------CLIENT-------------------------#
 
 hostname = "p9cx.org"
@@ -17,10 +18,13 @@ send_info_queue = Queue(maxsize=10)   # thread safe data exchange
 message_lock = threading.Lock()
 
 QUICK_GUIDE = "simply type, and press enter to transmit: \n"
+USER_JSON_NAME = "user_data.json"
+
+BASE_DIR = Path(__file__).resolve().parent
+storing = JsonStoring(BASE_DIR / USER_JSON_NAME)
 
 print("For more information check out the GitHub \n https://github.com/mynameisVictoria/comms-platform \n")
 
-storing = JsonStoring("user_data.json")
 if not storing.check_name():
     name = input("Whats your name? \n")
     storing.write_name(name)

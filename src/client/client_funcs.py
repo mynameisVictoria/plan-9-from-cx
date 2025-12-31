@@ -1,18 +1,18 @@
 import json
 
 class JsonStoring:
-    def __init__(self, file_name):
-        self.file_name = file_name
+    def __init__(self, file_path):
+        self.file_path = file_path
 
     def get_name(self):
-        with open(self.file_name, "r", encoding="utf-8") as file:
+        with self.file_path.open("r", encoding="utf-8") as file:
             contents = file.read()
             dict_data = json.loads(contents)
             name = dict_data["name"]
             return name
     
     def write_name(self,name):
-        with open(self.file_name,"r+", encoding="utf-8") as file:
+        with self.file_path.open("r+", encoding="utf-8") as file:
             contents = file.read()
             file.seek(0)
             file.truncate()
@@ -21,7 +21,7 @@ class JsonStoring:
             file.write(json.dumps(dict_data))
 
     def check_name(self):
-        with open(self.file_name, "r", encoding="utf-8") as file:
+        with self.file_path.open("r", encoding="utf-8") as file:
             contents = file.read()
             dict_data = json.loads(contents)
             if dict_data["name"] is None:
