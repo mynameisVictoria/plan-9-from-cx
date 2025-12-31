@@ -37,7 +37,7 @@ def send_receive_data(thread_client, thread_address):
             if not data:         # if no data is received
                 print(f"Client {thread_address} disconnected")
                 with message_lock:
-                    message_list.append(f"Client {thread_address} disconnected")
+                    message_list.append(f"Client {thread_address} disconnected".encode())
                 with socket_lock:
                     if thread_client in socket_list:
                         socket_list.remove(thread_client)
@@ -53,6 +53,7 @@ def send_receive_data(thread_client, thread_address):
             with socket_lock:
                 socket_list.remove(thread_client)
                 thread_client.close()
+                print(f"Client disconnected:[{thread_address}]")
                 break
 
 def broadcast_messages():
@@ -68,7 +69,7 @@ def broadcast_messages():
 
                 for list_client in socket_list[:]:
                     try:
-                        list_client.sendall(msg)
+                        list_client.sendall(msg.encode())
                     except OSError as e:
                         socket_list.remove(list_client)
                         list_client.close()
