@@ -9,11 +9,11 @@ import sys
 from pathlib import Path
 #-----------------CLIENT-------------------------#
 
-hostname = "p9cx.org"
+HOSTNAME = "p9cx.org"
 
 context = ssl.create_default_context()
 
-port = 1111
+PORT = 1111
 send_info_queue = Queue(maxsize=10)   # thread safe data exchange
 message_lock = threading.Lock()
 
@@ -53,8 +53,8 @@ def constant_recv(recv_socket):
             print(recv_socket.recv(1024).decode())
         except socket.timeout:
             continue
-        except Exception:
-            pass
+        except Exception as err:
+            print(err)
 
 def format_message(username, message):
     timestamp = datetime.now(timezone.utc).strftime('%H:%M:%S')
@@ -76,10 +76,10 @@ def main():
 
             tls_socket = context.wrap_socket(
                 my_socket,
-                server_hostname=hostname
+                server_hostname=HOSTNAME
             )
 
-            tls_socket.connect((hostname, port))
+            tls_socket.connect((HOSTNAME, PORT))
             recv_thread = threading.Thread(target=constant_recv, daemon=True, args=(tls_socket,))
             recv_thread.start()
 
