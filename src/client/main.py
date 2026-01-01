@@ -4,6 +4,7 @@ from queue import Queue
 from client_funcs import *
 import ssl
 from pathlib import Path
+from time import sleep
 #-----------------CLIENT-------------------------#
 
 HOSTNAME = "p9cx.org"
@@ -21,20 +22,17 @@ BASE_DIR = Path(__file__).resolve().parent
 storing = JsonStoring(BASE_DIR / USER_JSON_NAME)
 
 user_io = GeneralIO()
-print("For more information check out the GitHub \n https://github.com/mynameisVictoria/comms-platform \n")
+print("For more information check out the GitHub \n https://github.com/mynameisVictoria/comms-platform \nDo /help for help!")
 
-if not storing.check_name():
-    name = input("Whats your name? \n")
-    storing.write_name(name)
-elif storing.check_name():
-    name_decision = input(f"do you wish to change your name, current name: {storing.get_name()} \n y or n \n")
-    if name_decision.lower() == "y":
-        new_name = input("input new name \n")
-        storing.write_name(new_name)
 print(QUICK_GUIDE)
 
 def handle_input():
-    message_queue.put(user_io.get_input())
+    while True:
+        sleep(0.1)
+        input_data = user_io.get_input()
+        user_io.do_command(input_data)
+        with message_lock:
+            message_queue.put(input_data)
 
 def socket_receive(recv_socket):
     while True:
