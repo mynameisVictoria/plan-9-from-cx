@@ -112,20 +112,15 @@ def network_main():
                 sleep(0.1)
 
                 server_sent_data = network.socket_receive()
-                if not server_sent_data:
-                    print("server not received data")
-                elif type(server_sent_data) == str:
+
+                if type(server_sent_data) == str:
                     window.new_message_signal.emit(server_sent_data)
-                    print("new message sent")
 
                 if not message_queue.empty():  # if it's not empty, try to send the data
                     try:
                         network.socket_send(message_queue.get())
-                        print("nessage queuue thingy")
                     except (socket.timeout, OSError):
-                        print("it BREAKS")
                         break
-
         except socket.error:
             continue
 
