@@ -17,16 +17,12 @@ simple communication, and i geuss techincly data sharing lol.
 - is opensource, privacy rules!
 
 ## Release state
-- currently in pre-alpha
+- currently in alpha
 - right now its not great lol
-- i will try to get
-- release rn is very uncertain, i dont know if i wanna polish it out more, or just start releasing
-- probably all the releases that are pre-alpha will be terminal
-- alpha 0.0.1 will be a gui i think
-- and beta, or maybe just the first actuall release will have voice call
+- probably all the releases that are alpha will be terminal
 
 Current version:
-0.5.1-dev
+0.0.1-alpha
 
 ---
 
