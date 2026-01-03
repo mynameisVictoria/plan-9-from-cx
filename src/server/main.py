@@ -70,6 +70,9 @@ def send_receive_data(thread_client, thread_address):
                 thread_client.close()
                 print(f"Client disconnected:[{thread_address}]")
                 break
+        except BrokenPipeError:
+            with socket_lock:
+                socket_list.remove(thread_client)
 
 def broadcast_messages():
     while True:
