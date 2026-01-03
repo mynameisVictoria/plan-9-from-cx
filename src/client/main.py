@@ -1,4 +1,4 @@
-#  Copyright (C) <2026>  <mynameisVictoria>
+#  Copyright (C) <2026>  <mynameisVictoria> and <Victoria2048>
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -13,13 +13,13 @@
 #   You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import socket
 import threading
 from queue import Queue
 from client_funcs import *
 import ssl
-from pathlib import Path
 from time import sleep
+import os 
+import sys
 #-----------------CLIENT-------------------------#
 
 HOSTNAME = "p9cx.org"
@@ -30,21 +30,32 @@ PORT = 1111
 message_queue = Queue(maxsize=10)   # thread safe data exchange
 message_lock = threading.Lock()
 
-QUICK_GUIDE = "simply type, and press enter to transmit: \n"
-USER_JSON_NAME = "user_data.json"
 
-BASE_DIR = Path(__file__).resolve().parent
-storing = JsonStoring(BASE_DIR / USER_JSON_NAME)
+if getattr(sys, "frozen", False):
+    BASE_DIR = os.path.dirname(sys.executable)
+else:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+json_path = os.path.join(BASE_DIR, "user_data.json")
+storing = JsonStoring(json_path)
 user_io = GeneralIO()
+
 print("For more information check out the GitHub \n https://github.com/mynameisVictoria/comms-platform \nDo /help for help!")
 
-print(QUICK_GUIDE)
+if not storing.check_name():
+    name = input("Please enter your name: \n")
+    storing.write_name(name)
+elif storing.check_name():
+    yes_or_no = input(f"Do you want to change your name? Current name: {storing.get_name()} \n y or n \n ")
+    if yes_or_no.lower() == "y":
+        new_name = input("Please enter your new name: \n")
+        storing.write_name(new_name)
+
+print("just type and press enter to transmit")
 
 def handle_input():
     while True:
-        sleep(0.1)
-        input_data = user_io.get_input()
+        input_data = input()
         with message_lock:
             message_queue.put(input_data)
 
