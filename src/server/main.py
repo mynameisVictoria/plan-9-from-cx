@@ -1,4 +1,4 @@
-#  Copyright (C) <2026>  <mynameisVictoria> and <Victoria2048>
+#  Copyright (C) <2026>  <mynameisVictoria>
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -33,30 +33,37 @@ client_context = ssl.create_default_context()
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
+message_history = []
 message_list = []
 socket_list = []
 socket_lock = threading.Lock()
 message_lock = threading.Lock()
+history_lock = threading.Lock()
+
 
 server_socket.bind(("0.0.0.0", port))
 server_socket.listen(5)
 
-def send_receive_data(thread_client, thread_address):
 
+def receive_data(thread_client, thread_address):
     thread_client.settimeout(0.1)
     while True:
         sleep(0.1)  #not to hoard the cpu lol
         try:
             message_data = thread_client.recv(1024).decode("utf8")
 
-            if not message_data:         # if no data is received
+            if not message_data:  # if no data is received
                 print(f"Client {thread_address} disconnected")
                 with socket_lock:
                     if thread_client in socket_list:
                         socket_list.remove(thread_client)
                 break
+
             with message_lock:
                 message_list.append(message_data)
+
+            with history_lock:
+                message_history.append(message_data)
 
             print(f"Received from {thread_address}: {message_data}")
 
@@ -69,6 +76,7 @@ def send_receive_data(thread_client, thread_address):
                 thread_client.close()
                 print(f"Client disconnected:[{thread_address}]")
                 break
+
         except BrokenPipeError:
             with socket_lock:
                 thread_client.close()
@@ -76,24 +84,24 @@ def send_receive_data(thread_client, thread_address):
 
 def broadcast_messages():
     while True:
-        sleep(0.1) # avoid hoarding the cpu
+        sleep(0.1)  # avoid hoarding the cpu
 
         with message_lock:
-            if not message_list:   #if its empty
-                continue           #restarts the loop
+            if not message_list:  #if its empty
+                continue  #restarts the loop
             msg = message_list.pop(0)
 
         with socket_lock:
 
-                for list_client in socket_list[:]:
-                    try:
-                        list_client.sendall(msg.encode())
-                    except OSError:
-                        socket_list.remove(list_client)
-                        list_client.close()
+            for client_socket in socket_list[:]:
+                try:
+                    client_socket.sendall(msg.encode())
+                except OSError:
+                    socket_list.remove(client_socket)
+                    client_socket.close()
+
 
 def main():
-
     broadcast_thread = threading.Thread(
         target=broadcast_messages,
         daemon=True
@@ -102,15 +110,23 @@ def main():
     print("broadcast thread started")
 
     while True:
-        sleep(0.1) #dont wanna take up the cpu
+        sleep(0.1)  #dont wanna take up the cpu
         try:
             client, address = server_socket.accept()
             tls_client = server_context.wrap_socket(client, server_side=True)
 
+            history_data = ""
+
+            with history_lock:
+                for index in message_history:
+                    history_data += index + "\n"
+
+                tls_client.sendall(history_data.encode())
+
             with socket_lock:
                 socket_list.append(tls_client)
             client_thread = threading.Thread(
-                target=send_receive_data,
+                target=receive_data,
                 args=(tls_client, address),
                 daemon=True)
 
