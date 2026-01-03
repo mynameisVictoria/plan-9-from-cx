@@ -1,4 +1,4 @@
-#  Copyright (C) <2026>  <mynameisVictoria> and <Victoria2048>
+#  Copyright (C) <2026>  <mynameisVictoria> 
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -51,8 +51,6 @@ elif storing.check_name():
         new_name = input("Please enter your new name: \n")
         storing.write_name(new_name)
 
-print("just type and press enter to transmit")
-
 def handle_input():
     while True:
         input_data = input()
@@ -60,6 +58,19 @@ def handle_input():
             message_queue.put(input_data)
 
 def socket_receive(recv_socket):
+
+    message_history = b""
+    while True:
+        try:
+            part = recv_socket.recv(1024)
+        except socket.timeout:
+            break
+        if not part:
+            break
+        message_history += part
+
+    print(message_history.decode("utf-8"))
+
     while True:
         sleep(0.1)
         try:
@@ -97,8 +108,8 @@ def main():
                     except (socket.error, OSError):
                         break
 
-        except socket.error:
-            print("test")
+        except socket.error as err:
+            print(f"socket error: {err}")
 
 
 input_thread = threading.Thread(target=handle_input)
