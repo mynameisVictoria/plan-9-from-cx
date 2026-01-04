@@ -1,6 +1,6 @@
 # plan 9 from communications extent; a in the works communication platform!
 
-simple communication, and i geuss techincly data sharing lol.
+simple communication, and I geuss techincly data sharing lol.
 
 ## Quick Facts
 - built because: communications platforms are fun!
