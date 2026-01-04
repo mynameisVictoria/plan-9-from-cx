@@ -1,4 +1,4 @@
-#  Copyright (C) <2026>  <mynameisVictoria> 
+#  Copyright (C) <2026>  <mynameisVictoria>
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -13,107 +13,82 @@
 #   You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import threading
-from queue import Queue
-from client_funcs import *
-import ssl
+import json
 from time import sleep
-import os 
 import sys
-#-----------------CLIENT-------------------------#
+from datetime import datetime, timezone
+import os
 
-HOSTNAME = "p9cx.org"
+class JsonStoring:
+    def __init__(self, file_name):
+        self.file_name = file_name
+        self._ensure_file_exists()
 
-context = ssl.create_default_context()
+    def _ensure_file_exists(self):
+        if not os.path.exists(self.file_name):
+            with open(self.file_name, "w", encoding="utf-8") as f:
+                json.dump({"name": None}, f)
 
-PORT = 1111
-message_queue = Queue(maxsize=10)   # thread safe data exchange
-message_lock = threading.Lock()
+    def get_name(self):
+        with open(self.file_name, "r", encoding="utf-8") as file:
+            contents = file.read()
+            dict_data = json.loads(contents)
+            name = dict_data["name"]
+            return name
+    def write_name(self,name):
+        with open(self.file_name,"r+", encoding="utf-8") as file:
+            contents = file.read()
+            file.seek(0)
+            file.truncate()
+            dict_data = json.loads(contents)
+            dict_data["name"] = name
+            file.write(json.dumps(dict_data))
 
+    def check_name(self):
+        with open(self.file_name, "r", encoding="utf-8") as file:
+            contents = file.read()
+            dict_data = json.loads(contents)
+            if dict_data["name"] is None:
+                return False
+            else:
+                return True
 
-if getattr(sys, "frozen", False):
-    BASE_DIR = os.path.dirname(sys.executable)
-else:
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+class GeneralIO:
+    def __init__(self):
+        pass
+    @staticmethod
+    def get_input():
+        while True:
+            sleep(0.1)
+            send_info_input = input("")
+            if not send_info_input.strip() == "":
+                return send_info_input
 
-json_path = os.path.join(BASE_DIR, "user_data.json")
-storing = JsonStoring(json_path)
-user_io = GeneralIO()
+    @staticmethod
+    def format_message(username, message):
+        timestamp = datetime.now(timezone.utc).strftime('%H:%M:%S')
+        return f"[{timestamp} ] | {username}: {message}"
 
-print("For more information check out the GitHub \n https://github.com/mynameisVictoria/comms-platform \nDo /help for help!")
+class Commands:
+    def __init__(self, given_command, json_obj):
+        self.given_command = given_command
+        self.json_obj = json_obj
 
-if not storing.check_name():
-    name = input("Please enter your name: \n")
-    storing.write_name(name)
-elif storing.check_name():
-    yes_or_no = input(f"Do you want to change your name? Current name: {storing.get_name()} \n y or n \n ")
-    if yes_or_no.lower() == "y":
-        new_name = input("Please enter your new name: \n")
-        storing.write_name(new_name)
+    def check_command(self):
+        if self.given_command == "/help":
+            self.help()
+        elif self.given_command == "/name":
+            self.change_name()
+        elif self.given_command == "/exit":
+            os._exit(0)
+        else:
+            return False
 
-def handle_input():
-    while True:
-        input_data = input()
-        with message_lock:
-            message_queue.put(input_data)
+    def change_name(self):
+        new_name = input("Enter new name: ")
+        self.json_obj.write_name(new_name)
 
-def socket_receive(recv_socket):
-
-    message_history = b""
-    while True:
-        try:
-            part = recv_socket.recv(1024)
-        except socket.timeout:
-            break
-        if not part:
-            break
-        message_history += part
-
-    print(message_history.decode("utf-8"))
-
-    while True:
-        sleep(0.1)
-        try:
-            print(recv_socket.recv(1024).decode("utf-8"))
-        except socket.timeout:
-            continue
-        except Exception as err:
-            print(err)
-
-def main():
-    while True:
-        sleep(0.5)
-
-        try:
-            my_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            my_socket.settimeout(0.5)
-
-            tls_socket = context.wrap_socket(
-                my_socket,
-                server_hostname=HOSTNAME
-            )
-
-            tls_socket.connect((HOSTNAME, PORT))
-
-            recv_thread = threading.Thread(target=socket_receive, daemon=True, args=(tls_socket,))
-            recv_thread.start()
-
-            while True:
-                sleep(0.1)
-                if not message_queue.empty():  #if it's not empty, try to send the data
-                    try:
-                        with message_lock:
-                            send_data = user_io.format_message(storing.get_name(), message_queue.get())
-                            tls_socket.sendall(send_data.encode("utf-8"))
-                    except (socket.error, OSError):
-                        break
-
-        except socket.error as err:
-            print(f"socket error: {err}")
-
-
-input_thread = threading.Thread(target=handle_input)
-input_thread.start()
-
-main()
-input_thread.join()
+    @staticmethod
+    def help():
+        print(f"Do /name to change you name, it will prompt you afterwards "
+              f"Do /exit to exit \n ")
