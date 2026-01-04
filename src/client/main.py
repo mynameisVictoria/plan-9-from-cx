@@ -61,7 +61,6 @@ def handle_input():
             message_queue.put(input_data)
 
 def socket_receive(recv_socket):
-
     message_history = b""
     while True:
         try:
@@ -113,7 +112,6 @@ def main():
 
         except socket.error as err:
             print(f"socket error: {err}")
-
 
 input_thread = threading.Thread(target=handle_input, daemon=True)
 input_thread.start()
