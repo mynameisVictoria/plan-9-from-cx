@@ -13,141 +13,108 @@
 #   You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import socket
-from time import sleep
 import threading
+from queue import Queue
+from client_funcs import *
 import ssl
+from time import sleep
+import os 
+import sys
+import socket
 
-#-------------SERVER----------#
+#-----------------CLIENT-------------------------#
 
-port = 1111
+HOSTNAME = "p9cx.org"
 
-server_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-server_context.load_cert_chain(
-    certfile="/etc/letsencrypt/live/p9cx.org/fullchain.pem",
-    keyfile="/etc/letsencrypt/live/p9cx.org/privkey.pem"
-)
+context = ssl.create_default_context()
 
-client_context = ssl.create_default_context()
-
-server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
-message_history = []
-message_list = []
-socket_list = []
-socket_lock = threading.Lock()
+PORT = 1111
+message_queue = Queue(maxsize=10)   # thread safe data exchange
 message_lock = threading.Lock()
-history_lock = threading.Lock()
 
-server_socket.bind(("0.0.0.0", port))
-server_socket.listen(5)
+if getattr(sys, "frozen", False):
+    BASE_DIR = os.path.dirname(sys.executable)
+else:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-def receive_data(thread_client, thread_address):
-    thread_client.settimeout(0.1)
+json_path = os.path.join(BASE_DIR, "user_data.json")
+storing = JsonStoring(json_path)
+user_io = GeneralIO()
+
+if not storing.check_name():
+    name = input("Please enter your name: \n")
+    storing.write_name(name)
+elif storing.check_name():
+    yes_or_no = input(f"Do you want to change your name? Current name: {storing.get_name()} \n y or n \n ")
+    if yes_or_no.lower() == "y":
+        new_name = input("Please enter your new name: \n")
+        storing.write_name(new_name)
+
+def handle_input():
     while True:
-        sleep(0.1)  #not to hoard the cpu lol
-        try:
-            message_data = thread_client.recv(1024).decode("utf8")
-
-            if not message_data:  # if no data is received
-                print(f"Client {thread_address} disconnected")
-                with socket_lock:
-                    if thread_client in socket_list:
-                        socket_list.remove(thread_client)
-                break
-
-            with message_lock:
-                message_list.append(message_data)
-
-            with history_lock:
-                message_history.append(message_data)
-
-            print(f"Received from {thread_address}: {message_data}")
-
-        except socket.timeout:
-            pass
-
-        except ConnectionResetError:
-            with socket_lock:
-                socket_list.remove(thread_client)
-                thread_client.close()
-                print(f"Client disconnected:[{thread_address}]")
-                break
-
-        except BrokenPipeError:
-            with socket_lock:
-                socket_list.remove(thread_client)
-                thread_client.close()
-                print(f"Client disconnected:[{thread_address}]")
-                break
-def broadcast_messages():
-    while True:
-        sleep(0.1)  # avoid hoarding the cpu
-
+        input_data = input()
+        command = Commands(input_data, storing)
+        command.check_command()
         with message_lock:
-            if not message_list:  #if its empty
-                continue  #restarts the loop
-            msg = message_list.pop(0)
+            message_queue.put(input_data)
 
-        with socket_lock:
+def socket_receive(recv_socket):
+    message_history = b""
+    while True:
+        try:
+            part = recv_socket.recv(1024)
+        except socket.timeout:
+            break
+        if not part:
+            break
+        message_history += part
 
-            for client_socket in socket_list[:]:
-                try:
+    print(message_history.decode("utf-8"))
 
-                    trimmed_msg = msg.strip().split(":")
-                    print(trimmed_msg)
-
-                    if "/online" in trimmed_msg:
-                        counter = 0
-                        for sockets in socket_list:
-                            counter += 1
-                        client_socket.sendall(str(counter).encode())
-                        print("sent online clients")
-
-                    else:
-                        client_socket.sendall(msg.encode())
-
-                except OSError:
-                    socket_list.remove(client_socket)
-                    client_socket.close()
-
-
-def main():
-    broadcast_thread = threading.Thread(
-        target=broadcast_messages,
-        daemon=True
-    )
-    broadcast_thread.start()
-    print("broadcast thread started")
+    print("For more information check out the GitHub \n https://github.com/mynameisVictoria/comms-platform \nDo /help for help!")
 
     while True:
-        sleep(0.1)  #dont wanna take up the cpu
+        sleep(0.1)
         try:
-            client, address = server_socket.accept()
-            tls_client = server_context.wrap_socket(client, server_side=True)
-
-            history_data = ""
-
-            with history_lock:
-                for index in message_history:
-                    history_data += index + "\n"
-
-                tls_client.sendall(history_data.encode())
-
-            with socket_lock:
-                socket_list.append(tls_client)
-            client_thread = threading.Thread(
-                target=receive_data,
-                args=(tls_client, address),
-                daemon=True)
-
-            client_thread.start()
-            print("threads started")
-
-        except OSError:
+            print(recv_socket.recv(1024).decode("utf-8"))
+        except socket.timeout:
             continue
         except Exception as err:
             print(err)
 
+def main():
+    while True:
+        sleep(0.5)
+        try:
+            my_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            my_socket.settimeout(0.5)
+
+            tls_socket = context.wrap_socket(
+                my_socket,
+                server_hostname=HOSTNAME
+            )
+
+            tls_socket.connect((HOSTNAME, PORT))
+
+            recv_thread = threading.Thread(target=socket_receive, daemon=True, args=(tls_socket,))
+            recv_thread.start()
+
+            while True:
+                sleep(0.1)
+                if not message_queue.empty():  #if it's not empty, try to send the data
+                    try:
+                        with message_lock:
+                            message = message_queue.get()
+                            send_data = user_io.format_message(storing.get_name(), message)
+                            tls_socket.sendall(send_data.encode("utf-8"))
+                    except (socket.error, OSError):
+                        break
+
+        except socket.error as err:
+            print(f"socket error: {err}")
+
+input_thread = threading.Thread(target=handle_input, daemon=True)
+input_thread.start()
+
 main()
+input_thread.join()
