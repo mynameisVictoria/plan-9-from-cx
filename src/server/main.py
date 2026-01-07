@@ -34,7 +34,7 @@ server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
 message_history = []
-message_list = []
+message_broadcast_list = []
 socket_list = []
 socket_lock = threading.Lock()
 message_lock = threading.Lock()
@@ -58,7 +58,7 @@ def receive_data(thread_client, thread_address):
                 break
 
             with message_lock:
-                message_list.append(message_data)
+                message_broadcast_list.append(message_data)
 
             with history_lock:
                 message_history.append(message_data)
@@ -86,9 +86,9 @@ def broadcast_messages():
         sleep(0.1)  # avoid hoarding the cpu
 
         with message_lock:
-            if not message_list:  #if its empty
+            if not message_broadcast_list:  #if its empty
                 continue  #restarts the loop
-            msg = message_list.pop(0)
+            msg = message_broadcast_list.pop(0)
 
         with socket_lock:
 

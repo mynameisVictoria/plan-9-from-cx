@@ -15,7 +15,6 @@
 
 import json
 from time import sleep
-import sys
 from datetime import datetime, timezone
 import os
 import ssl
@@ -119,7 +118,7 @@ class Network:
         else:
             self.socket.connect((self.HOSTNAME, self.PORT))
 
-    def socket_sendall(self, data): #pass this a non binary form please
+    def socket_sendall(self, data): #pass this a non binary type please
         if self.socket is None:
             self.tls_socket_creation()
         else:
