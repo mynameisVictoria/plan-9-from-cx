@@ -5,8 +5,7 @@ simple communication, and I geuss techincly data sharing lol.
 ## Quick Facts
 - built because: communications platforms are fun!
 - Runs in: the terminal
-- i find ai in my opinion moraly unethical and i dont plan on letting any ai generated code being part of this code base
-  
+- i find ai really horrible, ethiccaly apart from anything else, so i dont indend any ai code being part of this project  
 
 ## Tech Stuff
 - it is server-client model
