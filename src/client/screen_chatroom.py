@@ -17,9 +17,10 @@ import dataclasses
 import threading
 import time
 
+from textual import events
 from textual.app import Screen
 from textual.app import ComposeResult, App
-from textual.widgets import Input, Log
+from textual.widgets import Input, Log, Footer
 from client_methods import *
 
 
@@ -38,6 +39,10 @@ class InputScreen(Screen):
 
     json_obj = JsonStoring("username.json")
 
+    BINDINGS = [
+        ("[Tab]", "Return", "Go back to the main menu!",),
+    ]
+
     CSS = """Input {
                 margin: 1 0;
                 padding: 0 1;
@@ -55,6 +60,7 @@ class InputScreen(Screen):
     def compose(self) -> ComposeResult:
         yield Log(id="history")
         yield Input(placeholder="lorem ipsum i forgot the rest", id="user_name")
+        yield Footer()
 
     def on_input_submitted(self, event: Input.Submitted) -> None:
 
@@ -134,4 +140,9 @@ class InputScreen(Screen):
     def on_mount(self):
         self.query_one("#history")
         threading.Thread(target=self.network_main, daemon=True).start()
+
+    def on_key(self, event: events.Key) -> None:
+        if event.key == "tab":
+            self.app.pop_screen()
+            self.app.push_screen("menu")
 

@@ -47,6 +47,13 @@ class AboutScreen(Screen):
                     Discord: victoria_91223 (discord, ironic right?)
                     Email: gameboynes2@pm.me (shush its a good email name)
                     GitHub repo: https://github.com/mynameisVictoria/plan-9-from-cx 
+                    
+                    Quick notes:
+                    
+                    -        If you change your name and it doesn't work do not worry! It does change the name you just have
+                             to restart the program
+                    -        Slight glitch in the main menu where it hitches a little
+                    
                     """
 
     def compose(self) -> ComposeResult:

@@ -70,3 +70,4 @@ class Username(Screen):
         elif event.key == "tab":
             self.app.pop_screen()
             self.app.push_screen("menu")
+
