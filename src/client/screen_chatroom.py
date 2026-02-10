@@ -20,7 +20,7 @@ import time
 from textual.app import Screen
 from textual.app import ComposeResult, App
 from textual.widgets import Input, Log
-from client_funcs import *
+from client_methods import *
 
 
 class InputApp(Screen):
@@ -36,7 +36,21 @@ class InputApp(Screen):
     recevied_message_lock = threading.Lock()
     typed_message_lock = threading.Lock()
 
-    CSS_PATH = "client_tcss.tcss"
+    json_obj = JsonStoring("username.json")
+
+    CSS = """Input {
+                margin: 1 0;
+                padding: 0 1;
+                border: none;
+                background: $surface;
+                width: 40;
+        }
+
+            Input:focus {
+                border: round;
+                border: black;
+                width: 80%;
+            }"""
 
     def compose(self) -> ComposeResult:
         yield Log(id="history")
@@ -57,7 +71,7 @@ class InputApp(Screen):
                 network = Network(self.DFLNVals.HOSTNAME, self.DFLNVals.PORT)
                 network.tls_socket_creation()
                 network.connect()
-                network.socket_sendall("name")
+                network.socket_sendall(f"{self.json_obj.get_name()}")
 
                 receive_thread = threading.Thread(
                     target=self.recv_loop,

@@ -18,7 +18,7 @@ from textual import events
 from textual.app import ComposeResult
 from textual.screen import Screen
 from textual.widgets import Input, Label
-from client_funcs import JsonStoring
+from client_methods import JsonStoring
 
 
 class Username(Screen):
@@ -58,13 +58,14 @@ class Username(Screen):
             if self.enter_counter == 1:
                 label.update("Are you sure?")
             elif self.enter_counter == 2:
-                if self.username == "":
-                    label.update("Invalid username")
+                if self.username != "" and len(self.username) < 24:
+                    label.update("Okay")
+                    self.json_obj.write_name(self.username)
                     self.enter_counter = 0
 
-                label.update("Okay")
-                self.json_obj.write_name(self.username)
-                self.enter_counter = 0
+                else:
+                    label.update("Invalid username")
+                    self.enter_counter = 0
 
         elif event.key == "tab":
             self.app.pop_screen()

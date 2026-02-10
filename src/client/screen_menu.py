@@ -14,8 +14,8 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from textual.widgets import Footer
-from chat import *
-from username import *
+from screen_chatroom import *
+from screen_username import *
 
 class Main(App):
 
@@ -75,8 +75,6 @@ class Menu(Screen):
                 self.app.pop_screen()
                 self.app.install_screen(Username, "username")
                 self.app.push_screen("username")
-
-
 
 if __name__ == "__main__":
     app = Main()
