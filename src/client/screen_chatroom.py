@@ -23,7 +23,7 @@ from textual.widgets import Input, Log
 from client_methods import *
 
 
-class InputApp(Screen):
+class InputScreen(Screen):
 
     @dataclasses.dataclass
     class NVals:

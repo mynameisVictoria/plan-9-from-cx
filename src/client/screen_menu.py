@@ -13,9 +13,9 @@
 #   You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from textual.widgets import Footer
 from screen_chatroom import *
 from screen_username import *
+from screen_about import *
 
 class Main(App):
 
@@ -25,6 +25,9 @@ class Main(App):
         }"""
 
     def on_mount(self) -> None:
+        self.app.install_screen(Username, "username")
+        self.app.install_screen(InputScreen, "chat")
+        self.app.install_screen(AboutScreen, "about")
         self.install_screen(Menu(), "menu")
         self.push_screen("menu")
 
@@ -69,12 +72,13 @@ class Menu(Screen):
         elif event.key == "enter":
             if self.currently_selected == 1:
                 self.app.pop_screen()
-                self.app.install_screen(InputApp, "chat")
                 self.app.push_screen("chat")
             elif self.currently_selected == 2:
                 self.app.pop_screen()
-                self.app.install_screen(Username, "username")
                 self.app.push_screen("username")
+            elif self.currently_selected == 3:
+                self.app.pop_screen()
+                self.app.push_screen("about")
 
 if __name__ == "__main__":
     app = Main()
