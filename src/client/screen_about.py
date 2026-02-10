@@ -42,17 +42,18 @@ class AboutScreen(Screen):
                     
                     -       And of course last but certainly not least, you! I know I already thanked you but I simply cannot stress enough how much it means 
                             that you are even reading this!
-                    
-                    My contacts!
-                    Discord: victoria_91223 (discord, ironic right?)
-                    Email: gameboynes2@pm.me (shush its a good email name)
-                    GitHub repo: https://github.com/mynameisVictoria/plan-9-from-cx 
+                            
                     
                     Quick notes:
                     
                     -        If you change your name and it doesn't work do not worry! It does change the name you just have
                              to restart the program
                     -        Slight glitch in the main menu where it hitches a little
+                    
+                    My contacts!
+                    Discord: victoria_91223 (discord, ironic right?)
+                    Email: gameboynes2@pm.me (shush its a good email name)
+                    GitHub repo: https://github.com/mynameisVictoria/plan-9-from-cx 
                     
                     """
 

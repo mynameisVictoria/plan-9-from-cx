@@ -13,12 +13,6 @@
 #   You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from server_methods import format_message
-import socket
-from time import sleep
-import threading
-import ssl
-
 #-------------SERVER----------#
 #--- In full cander, I must reveal the truth, this code is absolute shit,     ↓
 #--- this script is a direct descendant of the first tcp server I ever        ↓
@@ -26,6 +20,12 @@ import ssl
 #--- shit can handle more than 5 clients reliably (it cannot handle 1 client- ↓
 #--- reliably even)
 #--- I will fix it... eventually, good luck!
+
+from server_methods import format_message
+import socket
+from time import sleep
+import threading
+import ssl
 
 port = 1111
 
