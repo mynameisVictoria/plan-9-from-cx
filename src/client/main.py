@@ -1,6 +1,21 @@
-from textual import events
-from textual.widgets import Footer, Label
+#  Copyright (C) <2026>  <mynameisVictoria>
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+from textual.widgets import Footer
 from chat import *
+from username import *
 
 class Main(App):
 
@@ -25,8 +40,8 @@ class Menu(Screen):
 
     options_dict = {
         "1": "Enter Chatroom",
-        "2": "Change Penis",
-        "3": "Quit the penis",
+        "2": "Change username",
+        "3": "About",
     }
 
     def compose(self) -> ComposeResult:
@@ -56,6 +71,11 @@ class Menu(Screen):
                 self.app.pop_screen()
                 self.app.install_screen(InputApp, "chat")
                 self.app.push_screen("chat")
+            elif self.currently_selected == 2:
+                self.app.pop_screen()
+                self.app.install_screen(Username, "username")
+                self.app.push_screen("username")
+
 
 
 if __name__ == "__main__":
