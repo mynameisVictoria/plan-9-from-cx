@@ -37,7 +37,7 @@ class Menu(Screen):
 
     BINDINGS = [
         ("[Tab]", "change", "Changes menu option",),
-        ("ctrl+q", "quit", "Quit"),
+        ("[ctrl+q]", "quit", "Quit"),
         ("enter", "enter", "Selects menu option")
     ]
 

@@ -34,7 +34,7 @@ class AboutScreen(Screen):
                     
                     Some shoutouts here are:
                     
-                    -       The textual TUI library I’ve extensively used
+                    -       Textual, TUI library I’ve extensively used
                     
                     -       Victoria2048, a collaborator and friend of mine (their GitHub is  “https://github.com/Victoria2048”)
                     
@@ -48,7 +48,9 @@ class AboutScreen(Screen):
                     
                     -        If you change your name and it doesn't work do not worry! It does change the name you just have
                              to restart the program
-                    -        Slight glitch in the main menu where it hitches a little
+                    -        Slight glitch in the main menu where it hitches a little when you change options
+                    -        Sometimes when you join the chatroom (often the first time) it resends the entire message history
+                             when you send something, will plan to fix!
                     
                     My contacts!
                     Discord: victoria_91223 (discord, ironic right?)
