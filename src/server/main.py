@@ -55,6 +55,14 @@ socket_username_lock = threading.Lock()
 server_socket.bind(("0.0.0.0", port))
 server_socket.listen()
 
+def remove_client(client):
+    with socket_lock:
+        if client in socket_list:
+            socket_list.remove(client)
+    with socket_username_lock:
+        if client in socket_username_dict:
+            del socket_username_dict[client]
+    client.close()
 
 def receive_data(thread_client, thread_address):
     thread_client.settimeout(0.5)
@@ -69,11 +77,8 @@ def receive_data(thread_client, thread_address):
             message_data = thread_client.recv(1024).decode("utf8")
 
             if not message_data:  # if no data is received
-                with socket_lock:
-                    if thread_client in socket_list:
-                        socket_list.remove(thread_client)
-
-                print(f"Client {thread_address} disconnected")
+                remove_client(thread_client)
+                print(f"Client disconnected, (no data received):[{thread_address}]")
 
                 break
 
@@ -86,15 +91,10 @@ def receive_data(thread_client, thread_address):
             pass
 
         except (BrokenPipeError, ConnectionResetError):
-            with socket_lock:
-                socket_list.remove(thread_client)
-                thread_client.close()
+            remove_client(thread_client)
+            print(f"Client disconnected(BrokenPipeError or ConnectionResetError): {thread_address}")
+            break
 
-                with socket_lock:
-                    socket_list.remove(thread_client)
-
-                print(f"Client disconnected:[{thread_address}]")
-                break
 
 def broadcast_messages():
     while True:
@@ -107,11 +107,8 @@ def broadcast_messages():
             message_tuple = message_broadcast_list.pop(0)
             client_sock, msg = message_tuple
 
-            with socket_lock:
-                for key in socket_username_dict:
-                    if key == client_sock:
-                        username = socket_username_dict[key]
-
+            with socket_username_lock:
+                username = socket_username_dict.get(client_sock, "Unknown")
 
         with socket_lock:
 
@@ -125,8 +122,7 @@ def broadcast_messages():
                         message_history.append(formatted_message)
 
                 except OSError:
-                    socket_list.remove(client_socket)
-                    client_socket.close()
+                    remove_client(client_socket)
 
 def main():
     broadcast_thread = threading.Thread(
