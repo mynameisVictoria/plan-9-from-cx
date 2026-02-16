@@ -64,9 +64,16 @@ def remove_client(client):
             del socket_username_dict[client]
     client.close()
 
-def receive_data(thread_client, thread_address):
+def client_data_transmission(thread_client, thread_address):
     thread_client.settimeout(0.5)
     username = thread_client.recv(1024).decode("utf8")
+
+    history_data = ""
+
+    with history_lock:
+        for index in message_history:
+            history_data += index
+        thread_client.sendall(history_data.encode())
 
     with socket_username_lock:
         socket_username_dict.update({thread_client: username})
@@ -138,18 +145,11 @@ def main():
             client, address = server_socket.accept()
             tls_client = server_context.wrap_socket(client, server_side=True)
 
-            history_data = ""
-
-            with history_lock:
-                for index in message_history:
-                    history_data += index + "\n"
-                tls_client.sendall(history_data.encode())
-
             with socket_lock:
                 socket_list.append(tls_client)
 
             client_thread = threading.Thread(
-                target=receive_data,
+                target=client_data_transmission(tls_client, address),
                 args=(tls_client, address),
                 daemon=True)
 
