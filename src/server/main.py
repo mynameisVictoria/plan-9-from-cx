@@ -68,12 +68,9 @@ def client_data_transmission(thread_client, thread_address):
     thread_client.settimeout(0.5)
     username = thread_client.recv(1024).decode("utf8")
 
-    history_data = ""
-
     with history_lock:
-        for index in message_history:
-            history_data += index
-        thread_client.sendall(history_data.encode())
+        history_data = "\n".join(message_history)
+    thread_client.sendall(history_data.encode("utf-8"))
 
     with socket_username_lock:
         socket_username_dict.update({thread_client: username})
@@ -117,16 +114,17 @@ def broadcast_messages():
             with socket_username_lock:
                 username = socket_username_dict.get(client_sock, "Unknown")
 
+        formatted_message = format_message(username, msg.strip())
+
+        with history_lock:
+            message_history.append(formatted_message)
+
         with socket_lock:
 
             for client_socket in socket_list[:]:
                 try:
 
-                    formatted_message = format_message(username, msg.strip())
                     client_socket.sendall(formatted_message.encode("utf-8"))
-
-                    with history_lock:
-                        message_history.append(formatted_message)
 
                 except OSError:
                     remove_client(client_socket)
@@ -149,7 +147,7 @@ def main():
                 socket_list.append(tls_client)
 
             client_thread = threading.Thread(
-                target=client_data_transmission(tls_client, address),
+                target=client_data_transmission,
                 args=(tls_client, address),
                 daemon=True)
 
